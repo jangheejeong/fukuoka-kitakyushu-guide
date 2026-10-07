@@ -47,16 +47,19 @@ function diningNear(s,stop,from,policy){
 }
 export function assess(s,stop,from,at,end,nearby=false){
  const incoming=travel(from,stop,s.mode),outgoing=travel(stop,lookup(s.destination),s.mode);
- const win=stop.id==='market'&&['2026-10-11','2026-10-12'].includes(s.date)?[420,900]:stop.window;
- const arrival=at+incoming,visit=Math.max(arrival,win[0]),finish=visit+stop.stay+buffer(s),eta=finish+outgoing;
+ let win=stop.id==='market'&&['2026-10-11','2026-10-12'].includes(s.date)?[420,900]:stop.window;
+ const groupMeal=s.party==='family'&&stop.kind==='restaurant'&&!stop.facility;const stay=groupMeal?Math.max(90,stop.stay):stop.stay,queue=groupMeal?30:0;
+ const arrival=at+incoming;
+ if(stop.windows)win=stop.windows.find(w=>arrival<=w[1]&&Math.max(arrival,w[0])+queue+stay<=w[1])||stop.windows[stop.windows.length-1];
+ const visit=Math.max(arrival,win[0])+queue,finish=visit+stay+buffer(s),eta=finish+outgoing;
  let reason=stop.excluded||'';
  if(!reason&&s.rain&&stop.outdoor)reason='비 오는 날 야외 코스 제외';
  if(!reason&&s.stroller&&!stop.stroller)reason='유모차 동선 어려움 · 아기띠 전환 필요';
  if(!reason&&nearby&&!diningNear(s,stop,from,nearby))reason='현재 마지막 장소와 다른 지역';
  if(!reason&&!Number.isFinite(incoming+outgoing))reason='도보만으로 이동하기 어려운 지역 간 경로';
- if(!reason&&(finish-buffer(s)>win[1]||stop.id==='railway'&&visit>990))reason='보수적인 방문 계획 범위 밖 · 실제 영업 확인 필요';
+ if(!reason&&(finish-buffer(s)>win[1]||stop.id==='railway'&&visit>990||stop.lastLunchOrder&&visit<1020&&visit>stop.lastLunchOrder))reason='보수적인 방문 계획 범위 밖 · 실제 영업 확인 필요';
  if(!reason&&eta>end)reason=`목적지 마감 초과 ${Math.ceil(eta-end)}분`;
- return {stop,incoming,outgoing,arrival,visit,finish,eta,remaining:end-eta,buffer:buffer(s),wait:visit-arrival,reason,feasible:!reason};
+ return {stop,stay,queue,incoming,outgoing,arrival,visit,finish,eta,remaining:end-eta,buffer:buffer(s),wait:visit-arrival,reason,feasible:!reason};
 }
 export function plan(raw){
  const s=normalize(raw);if(!s)return {error:'출발지·목적지와 시간을 올바르게 입력해주세요.'};

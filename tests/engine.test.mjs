@@ -18,9 +18,9 @@ test('Oct12 holiday market uses morning planning range',()=>{const s=config('12'
 test('changing origin invalidates meal outside nearby region',()=>{const r=plan(config('11',{origin:'hotel',destination:'hotel',selected:['curry']}));assert.deepEqual(r.state.selected,[]);assert.match(r.removed[0].reason,/다른 지역/);});
 
 test('Oct12 meal-only corridor includes Hakata but selected sightseeing narrows region',()=>{
- const r=plan(config('12'));const meal=r.choices.find(x=>x.stop.id==='unagi');
+ const r=plan(config('12'));const meal=r.choices.find(x=>x.stop.id==='hakatadining');
  assert.equal(meal.feasible,true);assert.equal(meal.eta,865);assert.equal(meal.incoming,125);assert.equal(meal.outgoing,45);
- const selected=plan(config('12',{selected:['unagi']}));assert.equal(selected.timeline.length,1);assert.equal(selected.eta,865);
+ const selected=plan(config('12',{selected:['hakatadining']}));assert.equal(selected.timeline.length,1);assert.equal(selected.eta,865);
  const narrowed=plan(config('12',{selected:['retro']}));assert.equal(narrowed.hasTourist,true);assert.match(narrowed.choices.find(x=>x.stop.id==='unagi').reason,/다른 지역/);assert.match(narrowed.choices.find(x=>x.stop.id==='curry').reason,/마감 초과/);
  const local=plan(config('11',{selected:['retro']}));assert.equal(local.choices.find(x=>x.stop.id==='curry').feasible,true);
 });
