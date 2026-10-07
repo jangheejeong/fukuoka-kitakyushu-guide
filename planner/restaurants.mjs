@@ -1,9 +1,9 @@
 let DINING_DETAILS={};let researchAvailable=true;
-try{({DINING_DETAILS}=await import('./dining-details.mjs?v=20261007-dining-guide-1'));}catch{researchAvailable=false;}
-import {diningContent} from './dining-view.mjs?v=20261007-dining-guide-1';
-import {restaurants,attractions,zones} from './data.mjs?v=20261007-dining-guide-1';
-import {evidenceHTML} from './evidence.mjs?v=20261007-dining-guide-1';
-import {maps} from './engine.mjs?v=20261007-dining-guide-1';
+try{({DINING_DETAILS}=await import('./dining-details.mjs?v=20261008-daily-plan-1'));}catch{researchAvailable=false;}
+import {diningContent} from './dining-view.mjs?v=20261008-daily-plan-1';
+import {restaurants,attractions,zones} from './data.mjs?v=20261008-daily-plan-1';
+import {evidenceHTML} from './evidence.mjs?v=20261008-daily-plan-1';
+import {maps} from './engine.mjs?v=20261008-daily-plan-1';
 const select=document.getElementById('zone'),root=document.getElementById('dining');
 const used=[...new Set(restaurants.map(x=>x.zone))];select.innerHTML+=used.map(z=>`<option value="${z}">${zones[z]}</option>`).join('');
 const requested=new URLSearchParams(location.search).get('zone');if(used.includes(requested))select.value=requested;

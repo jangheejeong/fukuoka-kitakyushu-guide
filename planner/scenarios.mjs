@@ -1,6 +1,6 @@
-import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-dining-guide-1';
-import {lookup,travel,clock,maps} from './engine.mjs?v=20261007-dining-guide-1';
-import {restaurants} from './data.mjs?v=20261007-dining-guide-1';
+import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261008-daily-plan-1';
+import {lookup,travel,clock,maps} from './engine.mjs?v=20261008-daily-plan-1';
+import {restaurants} from './data.mjs?v=20261008-daily-plan-1';
 export const DAYS=['08','09','10','11','12'];
 export const DAYINFO={
  '08':{title:'후쿠오카 첫날',subtitle:'공항 → 숙소 체크인 → 가벼운 저녁 산책',party:'부부',note:'13:40 도착 · 입국·수하물 90분. GRAND BASE 체크인 후 관광하며 21시 숙소 복귀 목표.'},
@@ -21,10 +21,11 @@ export const COURSES={
  course('dazaifu','다자이후 참배길 + 박물관','작은 거리·정원과 실내 전시를 함께 봅니다. 이동이 길어 피곤하면 공원 코스가 편합니다.',[stop('dazaifutemple',75),{meal:true},stop('museum',70)],['shizenan','dazaifudining'],{outdoor:true}),
  course('rain','캐널시티 + 하카타 점심','이동을 줄이고 실내 쇼핑·휴식과 미즈타키 등 하카타 식사에 집중합니다.',[stop('canal',70),{meal:true}],['hanamidori','canaldining','unagi'],{rain:true,relaxed:true})],
  '10':[
- course('harbor','짐 맡기기 → 항구 산책 → 모지코 식사','짐은 숙소에 맡기고 유모차로 항구 동네를 둘러봅니다. 체크인은 산책 후 16시 이후에 합니다.',[stop('retro',55),{meal:true}],['curry','bearfruits'],{drop:true,outdoor:true}),
- course('rail','짐 맡기기 → 철도기념관 → 모지코 식사','항구 산책 대신 실내 철도 전시를 천천히 보는 대안입니다.',[stop('railway',55),{meal:true}],['curry','bearfruits'],{drop:true,rain:true}),
+ course('harbor','짐 맡기기 → 항구 산책 → 모지코 식사','짐은 숙소에 맡기고 유모차로 항구 동네를 둘러봅니다. 체크인은 산책 후 16시 이후에 합니다.',[stop('retro',55),{meal:true}],['curry','bearfruits'],{drop:true,outdoor:true,packedLunch:true}),
+ course('rail','짐 맡기기 → 철도기념관 → 모지코 식사','항구 산책 대신 실내 철도 전시를 천천히 보는 대안입니다.',[stop('railway',55),{meal:true}],['curry','bearfruits'],{drop:true,rain:true,packedLunch:true}),
  course('kokura','고쿠라 공원 + 점심 → KF1','기타큐슈 대표 도심을 먼저 봅니다. 체크인 전까지 짐을 직접 가지고 이동해야 합니다.',[stop('castle',55),{meal:true}],['riverwalk','katsu'],{carry:true,outdoor:true})],
  '11':[
+ course('karatoDinner','가라토시장 점심 → 모지코 산책 → 이른 야키카레 저녁','시장 점심 뒤 항구를 걷고 야키카레를 이른 저녁으로 먹습니다. 가족의 식사·대기를 포함해 18시 전 숙소 복귀를 목표로 합니다.',[stop('market',80),stop('retro',35),{meal:true,role:'dinner'}],['bearfruits','curry'],{outdoor:true,marketMeal:true}),
  course('karato','바다 건너 가라토시장 + 모지코','시장 혼잡이 괜찮을 때 추천합니다. 작은 항구와 바다를 함께 보고 시장 체류에 점심을 포함합니다. 가족 동석 보장은 없으며 혼잡하면 아기띠를 보조로 사용합니다.',[stop('market',80),stop('retro',55)],[],{outdoor:true,marketMeal:true}),
  course('museum','철도기념관 + 야키카레 + 항구','유모차로 이동하기 편한 모지코 안에서 관광과 대표 식사를 묶었습니다.',[stop('railway',60),{meal:true},stop('retro',45)],['curry','bearfruits'],{outdoor:true}),
  course('indoor','철도기념관 + 야키카레 + 해협박물관','실내 두 곳을 천천히 보고 가까운 곳에서 식사합니다.',[stop('railway',60),{meal:true},stop('kanmonmuseum',60)],['curry','bearfruits'],{rain:true,relaxed:true}),
@@ -56,7 +57,7 @@ export function evaluate(day,course,conditions={},mealId){
  }else if(day==='09'){at=540;from=resolve('hotel');add('GRAND BASE에서 출발',at,at,true,{place:from,detail:'부부 낮 일정'});
  }else if(day==='10'){
   anchored('GRAND BASE 체크아웃',600,600,{place:resolve('hotel')});from=resolve('hotel');
-  if(course?.carry){move('kokura',true);}else{move('kf1',true);if(at<780){add('짐 맡기기 가능 시각까지 대기',at,780,true);at=780;}anchored('KF1 짐 맡기기',at,at+15,{place:from,detail:'숙소 안내: 13시부터 가능. 실제 맡길 수 있는지 재확인.'});}
+  if(course?.carry){move('kokura',true);}else{move('kf1',true);if(at<780){if(course?.packedLunch&&780-at>=35){add('포장 점심 · 짐 맡기기 전 대기 활용',at,at+35,false,{mealPrep:true,detail:'전날 또는 출발 전에 도시락·샌드위치를 준비하세요. 숙소는 13시 전 입실 불가: 이동 중 또는 주변 이용 가능한 휴게 공간에서 각자 식사. 식당 좌석을 전제로 하지 않는 포장식 계획입니다.'});at+=35;}if(at<780)add('짐 맡기기 가능 시각까지 대기',at,780,true);at=780;}anchored('KF1 짐 맡기기',at,at+15,{place:from,detail:'숙소 안내: 13시부터 가능. 실제 맡길 수 있는지 재확인.'});}
  }else if(day==='11'){at=540;from=resolve('kf1');add('KF1에서 출발',at,at,true,{place:from});
  }else{at=course?.early?540:600;from=resolve('kf1');add('KF1 체크아웃·짐 동반 출발',at,at,true,{place:from,detail:'11시 이후 숙소 짐 보관 불가'});}
  if(c.delay){add(day==='08'?'체크인 후 관광 시작 지연':'출발 준비·추가 휴식',at,at+c.delay,true);at+=c.delay;}
@@ -75,7 +76,7 @@ export function evaluate(day,course,conditions={},mealId){
    for(const segment of policy.segments){
     if(segment.kind==='queue'){add(id==='market'?'시장 대기·자리 확보 가정':family?'가족 단체 식당 대기 가정':'추가 식당 대기 가정',at,at+segment.duration,false,{detail:`${policy.rounds===2?'팀 '+segment.round+' · ':''}${segment.duration}분 계획 가정 · 자리·대기 보장 없음`});}
     else if(segment.kind==='exchange'){add('유아·짐 돌봄 교대',at,at+segment.duration,false,{detail:'두 팀이 순서대로 식사 · 모두 끝나야 다음 이동'});}
-    else{add(p.name+(id==='market'?' · 점심 포함':'')+(policy.rounds===2?' · 팀 '+segment.round:''),at,at+segment.duration,false,{place:p,meal:!!step.meal,mealPolicy:policy,detail:(p.cuisine||p.note||'식사')+' · '+policy.explanation});}
+    else{add(p.name+(id==='market'?' · 점심 포함':step.role==='dinner'?' · 이른 저녁':day==='10'&&course?.packedLunch?' · 이른 저녁':'')+(policy.rounds===2?' · 팀 '+segment.round:''),at,at+segment.duration,false,{place:p,meal:!!step.meal,mealPolicy:policy,detail:(p.cuisine||p.note||'식사')+' · '+policy.explanation});}
     at+=segment.duration;
    }
   }else{add(p.name,at,at+duration,false,{place:p,meal:false,detail:p.note});at+=duration;}
@@ -83,7 +84,7 @@ export function evaluate(day,course,conditions={},mealId){
  }
  if(day==='08'){move('hotel',true);if(at>1260)problems.push('21시 숙소 복귀 목표 초과');add('GRAND BASE 복귀',at,at,true,{place:from});
  }else if(day==='09'){
-  move('hakata',true);if(at>1080)problems.push('18시 하카타 복귀 마감 초과');else{add('하카타 복귀 후 휴식',at,1080,true);at=1080;}
+  move('hakata',true);if(at>1080)problems.push('18시 하카타 복귀 마감 초과');else{if(1080-at>=30){add('하카타역에서 저녁 포장·다음 날 이동 점심 준비',at,at+30,false,{place:resolve('hakata'),mealPrep:true,stream:'부부',detail:'숙소에서 가족을 기다리는 저녁과 내일 이동 중 먹을 포장식을 미리 준비. 점포 영업·메뉴는 현장에서 확인하세요.'});at+=30;}if(at<1080)add('하카타 복귀 후 휴식',at,1080,true);at=1080;}
   move('hotel',true);timeline[timeline.length-1].stream='부부';
   const coupleArrival=at;
   if(at<1230)add('숙소에서 가족 합류까지 휴식',at,1230,true,{stream:'부부'});
@@ -95,7 +96,7 @@ export function evaluate(day,course,conditions={},mealId){
   at=Math.max(coupleArrival,1185+familyLeg);
   add('가족 합류 후 GRAND BASE 체크인',at,at+30,true,{stream:'함께',place:resolve('hotel')});at+=30;
   if(at>1320)problems.push('22시 체크인 한계 초과');
-  add('체크인 후 필요하면 근처 저녁·간식',at,at,false,{conditional:true,detail:'21시 이후 영업·주문 마감 확인 필요. 늦은 저녁은 확정하지 않았습니다.'});
+  add('체크인 후 필요하면 근처 저녁·간식',at,at,false,{conditional:true,detail:'부부는 하카타에서 준비한 포장 저녁을 숙소에서 먹는 편이 편합니다. 가족은 인천 출발 전에 식사·간식을 준비하세요. 추가 외식은 21시 이후 영업·주문 마감을 확인한 뒤 결정.'});
  }else if(day==='10'){move('kf1',true);if(at<960){add('체크인 시작까지 휴식·대기',at,960,true);at=960;}add('KF1 체크인',at,at+30,true,{place:from,detail:'16시부터 가능 · 도착 마감이 아닙니다.'});at+=30;if(at>1200)problems.push('20시 이후 체크인 계획 · 숙소 확인 필요');
  }else if(day==='11'){move('kf1',true);add('KF1 복귀',at,at,true,{place:from});if(at>1080)problems.push('18시 숙소 복귀 목표 초과');
  }else{
@@ -108,6 +109,6 @@ export function evaluate(day,course,conditions={},mealId){
 }
 export function cases(day,conditions){return COURSES[day].filter(c=>day!=='11'||(c.id!=='indoor'&&c.id!=='museum')||c.id===(conditions?.relaxed?'indoor':'museum')).map(c=>evaluate(day,c,conditions));}
 export function fallback(day,conditions){return evaluate(day,{id:'direct',title:day==='12'?'바로 공항으로 · 도착 후 식사':'이동·체크인과 휴식만',why:'필수 이동을 먼저 지키고 관광을 쉬는 가장 가벼운 기본안입니다.',steps:[],mealIds:[]},conditions);}
-export function recommend(day,conditions){const all=cases(day,conditions);const feasible=all.filter(x=>x.feasible&&(day!=='12'||900-x.finish>=15));if(conditions?.relaxed)return feasible.find(x=>x.course.relaxed||x.course.rain)||feasible[0]||fallback(day,conditions);return feasible[0]||fallback(day,conditions);}
+export function recommend(day,conditions){const all=cases(day,conditions);const feasible=all.filter(x=>x.feasible&&(day!=='12'||900-x.finish>=15));if(conditions?.relaxed)return feasible.find(x=>x.course.relaxed||x.course.rain)||feasible[0]||fallback(day,conditions);const preferred={'08':'oldtown','09':'sea','10':'harbor','11':'karatoDinner','12':'lunch'};return feasible.find(x=>x.course.id===preferred[day])||feasible[0]||fallback(day,conditions);}
 export function loadV2(storage){try{const r=JSON.parse(storage.getItem('fukuoka-courses-v2'));if(r?.version===2&&DAYS.includes(r.day)&&r.choices&&typeof r.choices==='object'&&r.conditions){const c={...defaultConditions(),...r.conditions,rain:false};if(typeof c.rain==='boolean'&&typeof c.relaxed==='boolean'&&['transit','driving'].includes(c.mode)&&Number.isInteger(c.delay)&&c.delay>=0&&c.delay<=180&&Number.isInteger(c.mealWait)&&c.mealWait>=0&&c.mealWait<=120&&validMealMode(c.mealMode))return {version:2,day:r.day,choices:r.choices,conditions:c};}}catch{}return {version:2,day:'08',choices:{},conditions:defaultConditions()};}
 export function selectedResult(state,day){const saved=state.choices?.[day],c=COURSES[day].find(x=>x.id===saved?.course);const result=c?evaluate(day,c,state.conditions,saved.meal):saved?.course==='direct'?fallback(day,state.conditions):null;return result?.feasible?result:recommend(day,state.conditions);}
