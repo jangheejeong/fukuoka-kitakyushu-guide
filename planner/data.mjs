@@ -4,7 +4,7 @@ export const locations=[place('hotel','GRAND BASE Hakata Gofuku','hakata','GRAND
 const attraction=(id,name,zone,stay,outdoor,stroller,note,source,window=[540,1020])=>({...place(id,name,zone),kind:'attraction',stay,outdoor,stroller,note,source,window});
 export const attractions=[
  attraction('kushida','구시다 신사·옛 거리','hakata',40,true,true,'짧은 구시가지 산책 · 자갈 구간은 아기띠 보조','https://yokanavi.com/'),
- attraction('canal','캐널시티 하카타','hakata',60,false,true,'비 오는 날 실내 휴식·쇼핑','https://canalcity.co.jp/',[600,1200]),
+ attraction('canal','캐널시티 하카타','hakata',60,false,true,'실내 휴식·쇼핑','https://canalcity.co.jp/',[600,1200]),
  attraction('ohoripark','오호리 공원','ohori',70,true,true,'호숫가 평탄한 산책 · 자연 풍경','https://www.ohorikouen.jp/',[540,1080]),
  attraction('momochibeach','모모치 해변','momochi',60,true,true,'바닷가 산책 · 모래 위 유모차 이동은 피하기','https://yokanavi.com/',[540,1140]),
  attraction('dazaifutemple','다자이후 텐만구·참배길','dazaifu',90,true,true,'작은 거리와 정원 · 혼잡·돌바닥 주의','https://www.dazaifutenmangu.or.jp/en/plan/faq/'),
@@ -16,7 +16,7 @@ export const attractions=[
  attraction('market','가라토시장 바칸가이','karato',60,false,true,'금·토 10–15 / 일·공휴일 07–15 · 개최일 확인','https://www.karatoichiba.com/calendars/',[600,900]),
  attraction('shiranoegarden','시라노에 식물공원','shiranoe',75,true,false,'자연 정원 · 경사·계단 때문에 아기띠 권장','https://www.shiranoe.com/'),
  attraction('plateau','히라오다이 전망·초원','hiraodai',90,true,false,'자연 풍경 · 유모차 어려움, 대중교통 긴 접근','https://www.hiraodai.jp/'),
- attraction('sarakuraview','사라쿠라산 전망','sarakura',90,true,false,'케이블카·슬로프카 운행과 날씨 확인','https://www.sarakurayama-cablecar.co.jp/',[660,1200]),
+ attraction('sarakuraview','사라쿠라산 전망','sarakura',90,true,false,'케이블카·슬로프카 운행 확인','https://www.sarakurayama-cablecar.co.jp/',[660,1200]),
  attraction('futamigaura','이토시마 후타미가우라','itoshima',75,true,true,'바다 풍경 · 해안까지 버스 배차 확인','https://www.crossroadfukuoka.jp/'),
  {...attraction('kawachi','가와치 후지엔','sarakura',90,true,false,'10월 초 계절 개장 기간 밖 · 제외','https://kawachi-fujien.com/'),excluded:'계절 개장 기간 밖'},
  {...attraction('cave','센부쓰 종유동','hiraodai',90,true,false,'물길·미끄럼 · 영유아 동반 제외','https://www.hiraodai.jp/'),excluded:'영유아·유모차 코스로 부적합'}

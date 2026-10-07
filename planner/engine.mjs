@@ -1,5 +1,5 @@
-import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-meal-modes-2';
-import {locations,stops,presets} from './data.mjs';
+import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-timeline-map-1';
+import {locations,stops,presets} from './data.mjs?v=20261007-timeline-map-1';
 export const time=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t||'')?Number(t.slice(0,2))*60+Number(t.slice(3)):NaN;
 export const clock=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
 export const lookup=id=>[...locations,...stops].find(x=>x.id===id);
@@ -21,7 +21,7 @@ export function normalize(raw){
  state.preset=p;
  if(!locations.some(x=>x.id===state.origin)||!locations.some(x=>x.id===state.destination)||!Number.isFinite(time(state.departure))||!Number.isFinite(time(state.deadline))||!['transit','walking','driving'].includes(state.mode)||!['couple','family'].includes(state.party)||state.date!==base.date||!validMealMode(state.mealMode))return null;
  state.selected=Array.isArray(raw?.selected)?[...new Set(raw.selected.filter(x=>typeof x==='string'&&stops.some(s=>s.id===x)))].slice(0,20):[];
- state.rain=state.rain===true;state.stroller=state.stroller===true;
+ state.rain=false;state.stroller=state.stroller===true;
  if(p==='12')state.destination='airport';
  if(p==='09')state.destination='hakata';
  if(p==='09family')state.destination='hotel';
@@ -55,13 +55,12 @@ export function assess(s,stop,from,at,end,nearby=false){
  const visit=Math.max(arrival,win[0])+queue,finish=visit+stay+buffer(s),eta=finish+outgoing;
  const lastOrder=visit+(policy?(policy.rounds-1)*(policy.roundDuration+policy.roundQueue)+policy.exchange:0);
  let reason=stop.excluded||'';
- if(!reason&&s.rain&&stop.outdoor)reason='비 오는 날 야외 코스 제외';
  if(!reason&&s.stroller&&!stop.stroller)reason='유모차 동선 어려움 · 아기띠 전환 필요';
  if(!reason&&nearby&&!diningNear(s,stop,from,nearby))reason='현재 마지막 장소와 다른 지역';
  if(!reason&&!Number.isFinite(incoming+outgoing))reason='도보만으로 이동하기 어려운 지역 간 경로';
  if(!reason&&(finish-buffer(s)>win[1]||stop.id==='railway'&&visit>990||stop.lastLunchOrder&&lastOrder<1020&&lastOrder>stop.lastLunchOrder))reason='보수적인 방문 계획 범위 밖 · 실제 영업 확인 필요';
  if(!reason&&eta>end)reason=`목적지 마감 초과 ${Math.ceil(eta-end)}분`;
- return {stop,stay,queue,policy,incoming,outgoing,arrival,visit,finish,eta,remaining:end-eta,buffer:buffer(s),wait:visit-arrival,reason,feasible:!reason};
+ return {stop,from,stay,queue,policy,incoming,outgoing,arrival,visit,finish,eta,remaining:end-eta,buffer:buffer(s),wait:visit-arrival,reason,feasible:!reason};
 }
 export function plan(raw){
  const s=normalize(raw);if(!s)return {error:'출발지·목적지와 시간을 올바르게 입력해주세요.'};
