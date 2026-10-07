@@ -1,5 +1,5 @@
-import {mealPolicy,validMealMode} from './meal-policy.mjs';
-import {lookup,travel,clock,maps} from './engine.mjs';
+import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-meal-modes-2';
+import {lookup,travel,clock,maps} from './engine.mjs?v=20261007-meal-modes-2';
 import {restaurants} from './data.mjs';
 export const DAYS=['08','09','10','11','12'];
 export const DAYINFO={

@@ -35,6 +35,8 @@
 
 현재 GitHub Pages는 `main` 브랜치 루트를 게시합니다. GitHub가 생성한 `pages-build-deployment` Actions 워크플로가 커밋 이후 빌드·배포합니다. 별도 호스팅이나 다른 GitHub 계정을 사용하지 않습니다.
 
+계산 코드가 바뀌면 HTML의 진입 스크립트와 변경 모듈을 불러오는 import의 버전 쿼리를 함께 갱신합니다. 새 화면과 캐시된 이전 계산 코드가 섞이지 않도록 합니다.
+
 ```sh
 gh auth status
 git remote -v

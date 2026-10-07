@@ -1,4 +1,4 @@
-import {lookup} from './engine.mjs';
+import {lookup} from './engine.mjs?v=20261007-meal-modes-2';
 export const CHECKED='2026-10-07';
 export const EVIDENCE={
  shizenan:{official:'공식 점포 안내: 정원·개실·테이블, 휠체어 대응 가능, 60명 수용 안내. 점심 11–16:30 / 주문 마감 15:30. 평일 예약 코스는 4,500엔 이상, 주말은 5,000엔부터이며 별도 저가 런치 메뉴 없음.',officialUrl:'https://www.umenohana.co.jp/stores/detail/66',google:'오늘 Google 4.2 / 리뷰 514개 확인. 표본: 메인 거리에서 조금 떨어져 조용하고 정원 좋음(3개월 전), 친절한 설명(8개월 전), 정갈한 두부 가이세키·조용한 방(6개월 전). Google 입구 접근 불가 표시는 공식 휠체어 대응 안내와 상충합니다.',googleQuery:'梅の花 太宰府別荘自然庵',judgment:'예약·식사 예산이 괜찮다면 정원·조용한 분위기를 좋아하는 부부 점심으로 추천합니다. 식사는 100–120분 중 110분을 계획 가정으로 확보합니다. 가족 단체는 유모차 진입·자리·예약 조건을 반드시 문의하세요. 해당 점포를 방문한 커뮤니티 후기 표본은 확인하지 못했습니다.'},

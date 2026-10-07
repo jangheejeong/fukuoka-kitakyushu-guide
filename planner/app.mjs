@@ -1,6 +1,6 @@
-import {MEAL_MODES} from './meal-policy.mjs';
+import {MEAL_MODES} from './meal-policy.mjs?v=20261007-meal-modes-2';
 import {locations,presets,zones} from './data.mjs';
-import {readSaved,saveState,plan,normalize,clock,maps,route,lookup} from './engine.mjs';
+import {readSaved,saveState,plan,normalize,clock,maps,route,lookup} from './engine.mjs?v=20261007-meal-modes-2';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let storage;try{storage=window.localStorage;}catch{storage=null;}
 let state=readSaved(storage);

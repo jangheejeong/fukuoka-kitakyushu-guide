@@ -1,4 +1,4 @@
-import {mealPolicy,validMealMode} from './meal-policy.mjs';
+import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-meal-modes-2';
 import {locations,stops,presets} from './data.mjs';
 export const time=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t||'')?Number(t.slice(0,2))*60+Number(t.slice(3)):NaN;
 export const clock=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;

@@ -1,6 +1,6 @@
 import {restaurants,attractions,zones} from './data.mjs';
-import {evidenceHTML} from './evidence.mjs';
-import {maps} from './engine.mjs';
+import {evidenceHTML} from './evidence.mjs?v=20261007-meal-modes-2';
+import {maps} from './engine.mjs?v=20261007-meal-modes-2';
 const select=document.getElementById('zone'),root=document.getElementById('dining');
 const used=[...new Set(restaurants.map(x=>x.zone))];select.innerHTML+=used.map(z=>`<option value="${z}">${zones[z]}</option>`).join('');
 const requested=new URLSearchParams(location.search).get('zone');if(used.includes(requested))select.value=requested;

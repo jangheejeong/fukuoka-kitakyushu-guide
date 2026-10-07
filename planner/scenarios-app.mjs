@@ -1,7 +1,7 @@
-import {DAYS,DAYINFO,COURSES,conditionInput,evaluate,cases,fallback,recommend,loadV2,selectedResult,locationMap,resolve} from './scenarios.mjs';
-import {MEAL_MODES,mealPolicy} from './meal-policy.mjs';
-import {evidenceHTML} from './evidence.mjs';
-import {clock,route} from './engine.mjs';
+import {DAYS,DAYINFO,COURSES,conditionInput,evaluate,cases,fallback,recommend,loadV2,selectedResult,locationMap,resolve} from './scenarios.mjs?v=20261007-meal-modes-2';
+import {MEAL_MODES,mealPolicy} from './meal-policy.mjs?v=20261007-meal-modes-2';
+import {evidenceHTML} from './evidence.mjs?v=20261007-meal-modes-2';
+import {clock,route} from './engine.mjs?v=20261007-meal-modes-2';
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let storage;try{storage=window.localStorage;}catch{storage=null;}let state=loadV2(storage);let current;
 const fixedLabels={'08':['13:40 국제선 도착','15:10 입국 완료','숙소 체크인 먼저','21시 숙소 복귀'],'09':['09시 부부 출발','18시 하카타 복귀','18:30 가족 도착','19:45 입국 완료','22시 체크인 한계'],'10':['10시 체크아웃','13시 짐 맡기기 가능','16시부터 KF1 체크인'],'11':['09시 KF1 출발','18시 KF1 복귀'],'12':['10시 출발 권장','11시 이후 짐 보관 불가','15시 국제선 도착 필수','18시 출발 → 19:45 인천']};
