@@ -1,6 +1,6 @@
-import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-timeline-map-1';
-import {lookup,travel,clock,maps} from './engine.mjs?v=20261007-timeline-map-1';
-import {restaurants} from './data.mjs?v=20261007-timeline-map-1';
+import {mealPolicy,validMealMode} from './meal-policy.mjs?v=20261007-dining-guide-1';
+import {lookup,travel,clock,maps} from './engine.mjs?v=20261007-dining-guide-1';
+import {restaurants} from './data.mjs?v=20261007-dining-guide-1';
 export const DAYS=['08','09','10','11','12'];
 export const DAYINFO={
  '08':{title:'후쿠오카 첫날',subtitle:'공항 → 숙소 체크인 → 가벼운 저녁 산책',party:'부부',note:'13:40 도착 · 입국·수하물 90분. GRAND BASE 체크인 후 관광하며 21시 숙소 복귀 목표.'},

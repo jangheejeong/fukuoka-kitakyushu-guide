@@ -1,5 +1,5 @@
-import {transportGuide} from './transport.mjs?v=20261007-timeline-map-1';
-import {maps} from './engine.mjs?v=20261007-timeline-map-1';
+import {transportGuide} from './transport.mjs?v=20261007-dining-guide-1';
+import {maps} from './engine.mjs?v=20261007-dining-guide-1';
 export function detailedTimeline(result){return result.timeline.map(t=>({...t,guide:t.from&&!t.flight?transportGuide(t.from,t.to,result.conditions.mode):null}));}
 export function timelinePins(events){
  const pins=[],last=new Map();let order=0;
