@@ -1,3 +1,4 @@
+import {mealPolicy,validMealMode} from './meal-policy.mjs';
 import {locations,stops,presets} from './data.mjs';
 export const time=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t||'')?Number(t.slice(0,2))*60+Number(t.slice(3)):NaN;
 export const clock=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
@@ -16,9 +17,9 @@ export function travel(a,b,mode){
 }
 export function normalize(raw){
  const p=Object.hasOwn(presets,raw?.preset)?raw.preset:'08',base=presets[p];
- const state={preset:p,...base,mode:'transit',rain:false,stroller:base.party==='family',selected:[],...raw};
+ const state={preset:p,...base,mode:'transit',mealMode:'together',rain:false,stroller:base.party==='family',selected:[],...raw};
  state.preset=p;
- if(!locations.some(x=>x.id===state.origin)||!locations.some(x=>x.id===state.destination)||!Number.isFinite(time(state.departure))||!Number.isFinite(time(state.deadline))||!['transit','walking','driving'].includes(state.mode)||!['couple','family'].includes(state.party)||state.date!==base.date)return null;
+ if(!locations.some(x=>x.id===state.origin)||!locations.some(x=>x.id===state.destination)||!Number.isFinite(time(state.departure))||!Number.isFinite(time(state.deadline))||!['transit','walking','driving'].includes(state.mode)||!['couple','family'].includes(state.party)||state.date!==base.date||!validMealMode(state.mealMode))return null;
  state.selected=Array.isArray(raw?.selected)?[...new Set(raw.selected.filter(x=>typeof x==='string'&&stops.some(s=>s.id===x)))].slice(0,20):[];
  state.rain=state.rain===true;state.stroller=state.stroller===true;
  if(p==='12')state.destination='airport';
@@ -48,18 +49,19 @@ function diningNear(s,stop,from,policy){
 export function assess(s,stop,from,at,end,nearby=false){
  const incoming=travel(from,stop,s.mode),outgoing=travel(stop,lookup(s.destination),s.mode);
  let win=stop.id==='market'&&['2026-10-11','2026-10-12'].includes(s.date)?[420,900]:stop.window;
- const groupMeal=s.party==='family'&&stop.kind==='restaurant'&&!stop.facility;const stay=groupMeal?Math.max(90,stop.stay):stop.stay,queue=groupMeal?30:0;
+ const isMeal=stop.kind==='restaurant'||stop.id==='market';const policy=isMeal?mealPolicy({family:s.party==='family',mode:s.mealMode,duration:stop.stay,facility:stop.facility,market:stop.id==='market'}):null;const stay=policy?.stay??stop.stay,queue=policy?.queue??0;
  const arrival=at+incoming;
  if(stop.windows)win=stop.windows.find(w=>arrival<=w[1]&&Math.max(arrival,w[0])+queue+stay<=w[1])||stop.windows[stop.windows.length-1];
  const visit=Math.max(arrival,win[0])+queue,finish=visit+stay+buffer(s),eta=finish+outgoing;
+ const lastOrder=visit+(policy?(policy.rounds-1)*(policy.roundDuration+policy.roundQueue)+policy.exchange:0);
  let reason=stop.excluded||'';
  if(!reason&&s.rain&&stop.outdoor)reason='비 오는 날 야외 코스 제외';
  if(!reason&&s.stroller&&!stop.stroller)reason='유모차 동선 어려움 · 아기띠 전환 필요';
  if(!reason&&nearby&&!diningNear(s,stop,from,nearby))reason='현재 마지막 장소와 다른 지역';
  if(!reason&&!Number.isFinite(incoming+outgoing))reason='도보만으로 이동하기 어려운 지역 간 경로';
- if(!reason&&(finish-buffer(s)>win[1]||stop.id==='railway'&&visit>990||stop.lastLunchOrder&&visit<1020&&visit>stop.lastLunchOrder))reason='보수적인 방문 계획 범위 밖 · 실제 영업 확인 필요';
+ if(!reason&&(finish-buffer(s)>win[1]||stop.id==='railway'&&visit>990||stop.lastLunchOrder&&lastOrder<1020&&lastOrder>stop.lastLunchOrder))reason='보수적인 방문 계획 범위 밖 · 실제 영업 확인 필요';
  if(!reason&&eta>end)reason=`목적지 마감 초과 ${Math.ceil(eta-end)}분`;
- return {stop,stay,queue,incoming,outgoing,arrival,visit,finish,eta,remaining:end-eta,buffer:buffer(s),wait:visit-arrival,reason,feasible:!reason};
+ return {stop,stay,queue,policy,incoming,outgoing,arrival,visit,finish,eta,remaining:end-eta,buffer:buffer(s),wait:visit-arrival,reason,feasible:!reason};
 }
 export function plan(raw){
  const s=normalize(raw);if(!s)return {error:'출발지·목적지와 시간을 올바르게 입력해주세요.'};

@@ -1,3 +1,4 @@
+import {mealPolicy,validMealMode} from './meal-policy.mjs';
 import {lookup,travel,clock,maps} from './engine.mjs';
 import {restaurants} from './data.mjs';
 export const DAYS=['08','09','10','11','12'];
@@ -36,7 +37,8 @@ export const COURSES={
 const queries={shizenan:'梅の花 太宰府別荘自然庵',royalcafe:'ロイヤルガーデンカフェ 大濠公園',ohoripark:'Ohori Park Fukuoka',kushida:'Kushida Shrine Fukuoka',canal:'Canal City Hakata',momochibeach:'Seaside Momochi Beach Park',dazaifutemple:'Dazaifu Tenmangu',museum:'Kyushu National Museum Dazaifu',retro:'Mojiko Retro',railway:'Kyushu Railway History Museum',castle:'Kokura Castle Katsuyama Park',tanga:'Tanga Market Kokura',market:'Karato Market Shimonoseki',unagi:'吉塚うなぎ屋',hanamidori:'博多華味鳥 博多駅前店',motsu:'楽天地 博多駅前店',curry:'伽哩本舗 門司港レトロ店',bearfruits:'BEAR FRUITS 門司港',katsu:'牛カツ京都勝牛 小倉駅前店',riverwalk:'Riverwalk Kitakyushu restaurants',ohoridining:'restaurants near Ohori Park',dazaifudining:'restaurants near Dazaifu Tenmangu',hakatadining:'JR Hakata City restaurants',canaldining:'Canal City Hakata restaurants'};
 export const resolve=id=>id==='kanmonmuseum'?{id,name:'간몬해협 박물관',zone:'mojiko',query:'Kanmon Strait Museum Mojiko',window:[540,1020],source:'https://www.crossroadfukuoka.jp/spot/13211',note:'휴관·영업 확인 필요'}:{...lookup(id),query:queries[id]||lookup(id)?.query};
 export const locationMap=id=>maps(resolve(id));
-export function defaultConditions(){return {rain:false,relaxed:false,mode:'transit',delay:0,mealWait:0};}
+export function defaultConditions(){return {rain:false,relaxed:false,mode:'transit',delay:0,mealWait:0,mealMode:'together'};}
+export function conditionInput(field,value){if(field==='rain'||field==='relaxed')return value===true;if(field==='delay'||field==='mealWait')return Math.max(0,Math.min(field==='delay'?180:120,Number(value)||0));if(field==='mealMode')return validMealMode(value)?value:'together';return value;}
 const BUFFER=day=>['08','09'].includes(day)?15:25;
 export function evaluate(day,course,conditions={},mealId){
  const c={...defaultConditions(),...conditions};
@@ -46,7 +48,7 @@ export function evaluate(day,course,conditions={},mealId){
  const move=(id,mandatory=false,min=0)=>{const target=resolve(id);if(from&&from.id!==id){const n=Math.max(min,travel(from,target,c.mode));add(`${from.name} → ${target.name}`,at,at+n,mandatory,{travel:n,from,to:target});at+=n;}from=target;};
  const meal=course?.mealIds?.includes(mealId)?mealId:course?.mealIds?.[0];
  if(course?.outdoor&&c.rain)problems.push('우천에는 야외 코스를 추천하지 않음');
- if(c.delay<0||c.delay>180||!Number.isFinite(c.delay)||!['transit','driving'].includes(c.mode))problems.push('지연·이동 조건을 확인해주세요');
+ if(c.delay<0||c.delay>180||!Number.isFinite(c.delay)||!['transit','driving'].includes(c.mode)||!validMealMode(c.mealMode))problems.push('지연·이동 조건을 확인해주세요');
  if(day==='08'){
   anchored('인천 출발 → 후쿠오카 도착',735,820,{detail:'12:15 → 13:40 예정 · 부부'});
   anchored('후쿠오카 국제선 도착',820,820,{detail:'도착 예정 13:40 · 부부'});
@@ -65,12 +67,19 @@ export function evaluate(day,course,conditions={},mealId){
   if(p.windows){win=p.windows.find(w=>at<=w[1]&&at+(step.duration||p.stay||70)<=w[1])||p.windows[p.windows.length-1];}
   const open=id==='market'&&day==='11'?420:win[0];if(at<open){add('방문·영업 시작까지 대기',at,open,false);at=open;}
   const family=['10','11','12'].includes(day);
-  if(step.meal&&c.mealWait){add('추가 식당 대기 가정',at,at+c.mealWait,false,{detail:'추가 대기 시 마감까지 다시 계산'});at+=c.mealWait;}
-  if(id==='market'&&family){add('시장 대기·자리 확보 가정',at,at+30,false,{detail:'30분 계획 가정 · 가족 동석 보장 없음, 혼잡하면 아기띠 보조'});at+=30;}
-  if(step.meal&&family&&!p.facility){add('가족 단체 식당 대기 가정',at,at+30,false,{detail:'30분 계획 가정 · 실제 대기·동시 착석 확인 필요'});at+=30;}
-  const duration=step.meal&&family&&!p.facility?Math.max(90,p.stay||70):step.duration||p.stay||70;
-  if(at+duration>win[1]||id==='railway'&&at>990||p.lastLunchOrder&&at<1020&&at>p.lastLunchOrder)problems.push(`${p.name}: 방문·영업 계획 범위 밖 · 영업 확인 필요`);
-  add(p.name+(id==='market'?' · 점심 포함':''),at,at+duration,false,{place:p,meal:!!step.meal,detail:step.meal?(p.cuisine||'식사')+' · 영업·대기 확인 필요':p.note});at+=duration;
+  const isMeal=!!step.meal||id==='market';
+  const policy=isMeal?mealPolicy({family,mode:c.mealMode,duration:step.duration||p.stay||70,facility:p.facility,market:id==='market',extraWait:c.mealWait}):null;
+  const duration=policy?.total??(step.duration||p.stay||70);
+  const orderStart=at+(policy?policy.roundQueue+(policy.rounds-1)*(policy.roundDuration+policy.roundQueue)+policy.exchange:0);
+  if(at+duration>win[1]||id==='railway'&&at>990||p.lastLunchOrder&&orderStart<1020&&orderStart>p.lastLunchOrder)problems.push(`${p.name}: 방문·영업 계획 범위 밖 · 영업 확인 필요`);
+  if(policy){
+   for(const segment of policy.segments){
+    if(segment.kind==='queue'){add(id==='market'?'시장 대기·자리 확보 가정':family?'가족 단체 식당 대기 가정':'추가 식당 대기 가정',at,at+segment.duration,false,{detail:`${policy.rounds===2?'팀 '+segment.round+' · ':''}${segment.duration}분 계획 가정 · 자리·대기 보장 없음`});}
+    else if(segment.kind==='exchange'){add('유아·짐 돌봄 교대',at,at+segment.duration,false,{detail:'두 팀이 순서대로 식사 · 모두 끝나야 다음 이동'});}
+    else{add(p.name+(id==='market'?' · 점심 포함':'')+(policy.rounds===2?' · 팀 '+segment.round:''),at,at+segment.duration,false,{place:p,meal:!!step.meal,mealPolicy:policy,detail:(p.cuisine||p.note||'식사')+' · '+policy.explanation});}
+    at+=segment.duration;
+   }
+  }else{add(p.name,at,at+duration,false,{place:p,meal:false,detail:p.note});at+=duration;}
   add('이동 준비·휴식 여유',at,at+BUFFER(day),false);at+=BUFFER(day);
  }
  if(day==='08'){move('hotel',true);if(at>1260)problems.push('21시 숙소 복귀 목표 초과');add('GRAND BASE 복귀',at,at,true,{place:from});
@@ -101,5 +110,5 @@ export function evaluate(day,course,conditions={},mealId){
 export function cases(day,conditions){return COURSES[day].filter(c=>day!=='11'||(c.id!=='indoor'&&c.id!=='museum')||c.id===(conditions?.rain||conditions?.relaxed?'indoor':'museum')).map(c=>evaluate(day,c,conditions));}
 export function fallback(day,conditions){return evaluate(day,{id:'direct',title:day==='12'?'바로 공항으로 · 도착 후 식사':'이동·체크인과 휴식만',why:'필수 이동을 먼저 지키고 관광을 쉬는 가장 가벼운 기본안입니다.',steps:[],mealIds:[]},conditions);}
 export function recommend(day,conditions){const all=cases(day,conditions);const feasible=all.filter(x=>x.feasible&&(day!=='12'||900-x.finish>=15));if(conditions?.rain||conditions?.relaxed)return feasible.find(x=>x.course.relaxed||x.course.rain)||feasible[0]||fallback(day,conditions);return feasible[0]||fallback(day,conditions);}
-export function loadV2(storage){try{const r=JSON.parse(storage.getItem('fukuoka-courses-v2'));if(r?.version===2&&DAYS.includes(r.day)&&r.choices&&typeof r.choices==='object'&&r.conditions){const c={...defaultConditions(),...r.conditions};if(typeof c.rain==='boolean'&&typeof c.relaxed==='boolean'&&['transit','driving'].includes(c.mode)&&Number.isInteger(c.delay)&&c.delay>=0&&c.delay<=180&&Number.isInteger(c.mealWait)&&c.mealWait>=0&&c.mealWait<=120)return {version:2,day:r.day,choices:r.choices,conditions:c};}}catch{}return {version:2,day:'08',choices:{},conditions:defaultConditions()};}
+export function loadV2(storage){try{const r=JSON.parse(storage.getItem('fukuoka-courses-v2'));if(r?.version===2&&DAYS.includes(r.day)&&r.choices&&typeof r.choices==='object'&&r.conditions){const c={...defaultConditions(),...r.conditions};if(typeof c.rain==='boolean'&&typeof c.relaxed==='boolean'&&['transit','driving'].includes(c.mode)&&Number.isInteger(c.delay)&&c.delay>=0&&c.delay<=180&&Number.isInteger(c.mealWait)&&c.mealWait>=0&&c.mealWait<=120&&validMealMode(c.mealMode))return {version:2,day:r.day,choices:r.choices,conditions:c};}}catch{}return {version:2,day:'08',choices:{},conditions:defaultConditions()};}
 export function selectedResult(state,day){const saved=state.choices?.[day],c=COURSES[day].find(x=>x.id===saved?.course);const result=c?evaluate(day,c,state.conditions,saved.meal):saved?.course==='direct'?fallback(day,state.conditions):null;return result?.feasible?result:recommend(day,state.conditions);}
